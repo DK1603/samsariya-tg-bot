@@ -1,5 +1,6 @@
 import json
-from telegram import ReplyKeyboardMarkup
+from datetime import datetime
+from telegram import ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup
 
 # Поддерживаемые языки
 LANGUAGES = ['ru', 'uz']
@@ -11,9 +12,10 @@ with open('data/availability.json', 'r', encoding='utf-8') as f:
 # Тексты сообщений
 TEXTS = {
     'ru': {
-        'welcome': 'Привет! Assalomu alaykum!\n'
+        'welcome': 'Assalomu alaykum!\n'
                    'Добро пожаловать в Samsariya — бот для домашней самсы.\n'
-                   'Выберите раздел ниже.',
+                   '+998880009099',
+        'off_hours_preorder': 'Сейчас мы не работаем, но Вы можете оформить предзаказ',
         'about': 'Samsariya — это домашняя самса по семейным рецептам, без жира и добавок.',
         'promo': 'Акции и новинки:\n'
                  '- Самса с тыквой (сезонная)\n'
@@ -26,7 +28,20 @@ TEXTS = {
         'show_reviews': 'Отзывы клиентов:'
     },
     'uz': {
-        # Переводы на узбекский
+        'welcome': 'Assalomu alaykum!\n'
+                   'Samsariya – uy sharoitida pishirilgan somsa botiga xush kelibsiz.\n'
+                   '+998880009099',
+        'off_hours_preorder': 'Hozir faoliyatimiz to‘xtagan, oldindan buyurtma bera olasiz',
+        'about': 'Samsariya oila retsepti bo‘yicha, yog‘siz va qo‘shimchasiz tayyorlangan somsa.',
+        'promo': 'Aksiya va yangiliklar:\n'
+                 '- Qovoqli somsa (fasliy)\n'
+                 '- Payme orqali to‘lovda 10% chegirma',
+        'working_hours': 'Buyurtmalar 9:00–19:00 qabul qilinadi. Toshkent bo‘ylab 1–2 soat ichida yetkazib beramiz.',
+        'payments': 'Naqd yoki Payme orqali (100% oldindan to‘lov, chegirma bilan).',
+        'repeat_unavailable': 'Avvalgi buyurtmangiz yo‘q.',
+        'ask_review': 'Fikr-mulohazangizni matn yoki ovozli xabar sifatida yuboring.',
+        'thank_review': 'Rahmat! Fikringiz qabul qilindi.',
+        'show_reviews': 'Mijozlar fikrlari:'
     }
 }
 
@@ -37,21 +52,22 @@ KEYBOARDS = {
         ['/about', '/promo'],
         ['/workinghours', '/payments'],
         ['/repeat', '/language']
-    ]
+    ],
+    'back': [['/main']]
 }
 
 def init_bot_data(app):
-    app.bot_data['lang'] = 'ru'
+    app.bot_data['lang']  = 'ru'
     app.bot_data['texts'] = TEXTS['ru']
     app.bot_data['avail'] = AVAIL
-    app.bot_data['keyb'] = {
+    app.bot_data['keyb']  = {
         name: ReplyKeyboardMarkup(keys, one_time_keyboard=True)
         for name, keys in KEYBOARDS.items()
     }
 
 async def set_language(update, context):
-    markup = ReplyKeyboardMarkup([['ru', 'uz']], one_time_keyboard=True)
-    await update.message.reply_text('Выберите язык / Tilni tanlang', reply_markup=markup)
+    kb = ReplyKeyboardMarkup([['ru', 'uz']], one_time_keyboard=True)
+    await update.message.reply_text('Выберите язык / Tilni tanlang', reply_markup=kb)
 
 async def help_command(update, context):
     cmds = [
@@ -61,3 +77,9 @@ async def help_command(update, context):
         '/language — сменить язык', '/help — помощь'
     ]
     await update.message.reply_text('\n'.join(cmds))
+
+async def main_menu(update, context):
+    await update.message.reply_text(
+        context.bot_data['texts']['welcome'],
+        reply_markup=context.bot_data['keyb']['main']
+    )
